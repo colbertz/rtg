@@ -2,7 +2,7 @@ float FastInvSqrt(float x)
 {
     float xhalf = 0.5f * x;
     int i = *(int*)&x;
-    i = 0x5f3759df - (i>>1);
+    i = 0x5f3759df - (i>>1); //magic number
     x = *(float*)&i;
 
     //two times of Newton method to improve the precision
