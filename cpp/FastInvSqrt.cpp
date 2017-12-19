@@ -1,3 +1,7 @@
+//This is a very famouse algorithm. Check the following link to understand
+//the background math principle
+//http://blog.jobbole.com/105295/
+
 #include <iostream>
 
 float FastInvSqrt(float x)
