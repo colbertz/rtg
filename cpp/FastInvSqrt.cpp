@@ -1,3 +1,5 @@
+#include <iostream>
+
 float FastInvSqrt(float x)
 {
     float xhalf = 0.5f * x;
@@ -9,4 +11,10 @@ float FastInvSqrt(float x)
     x = x * (1.5f-(xhalf*x*x));
     x = x * (1.5f-(xhalf*x*x));
     return x;
+}
+
+int main()
+{
+    float ret = FastInvSqrt(2.82f);
+    std::cout<<ret;
 }
