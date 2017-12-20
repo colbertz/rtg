@@ -1,0 +1,211 @@
+Question 1,  difference char name[] and char* name
+--------------------------------------------------------------------------
+1:
+2:    void process()
+3:    {
+00401020   push        ebp
+00401021   mov         ebp,esp
+00401023   sub         esp,4Ch
+00401026   push        ebx
+00401027   push        esi
+00401028   push        edi
+00401029   lea         edi,[ebp-4Ch]
+0040102C   mov         ecx,13h
+00401031   mov         eax,0CCCCCCCCh
+00401036   rep stos    dword ptr [edi]
+4:        char name_tmp[] = {"hello"};
+00401038   mov         eax,[string "hello" (0042201c)]
+0040103D   mov         dword ptr [ebp-8],eax
+00401040   mov         cx,word ptr [string "hello"+4 (00422020)]
+00401047   mov         word ptr [ebp-4],cx
+5:        char* name_glb = "hello";
+0040104B   mov         dword ptr [ebp-0Ch],offset string "hello" (0042201c)
+6:    }
+00401052   pop         edi
+00401053   pop         esi
+00401054   pop         ebx
+00401055   mov         esp,ebp
+00401057   pop         ebp
+00401058   ret
+--------------------------------------------------------------------------
+"hello" is a global object in the data section.
+
+The local variable name_tmp is on the stack and there are four lines to copy
+the "hello" string to it. First two lines copies 4 bytes and the second two
+lines copies 2 bytes
+
+The local variable name_glb is a point on stack. It just set the address of 
+"hello" string to this pointer type variable.
+
+
+Question 2, difference between apple a(); and apple b;
+--------------------------------------------------------------------------
+
+class apple
+{
+public:
+    apple() {}
+    ~apple() {}
+};
+
+9:    void process()
+10:   {
+00401020   push        ebp
+00401021   mov         ebp,esp
+00401023   sub         esp,44h
+00401026   push        ebx
+00401027   push        esi
+00401028   push        edi
+00401029   lea         edi,[ebp-44h]
+0040102C   mov         ecx,11h
+00401031   mov         eax,0CCCCCCCCh
+00401036   rep stos    dword ptr [edi]
+11:       apple a();
+12:       apple b;
+00401038   lea         ecx,[ebp-4]
+0040103B   call        @ILT+20(apple::apple) (00401019)
+13:   }
+00401040   lea         ecx,[ebp-4]
+00401043   call        @ILT+10(apple::~apple) (0040100f)
+00401048   pop         edi
+00401049   pop         esi
+0040104A   pop         ebx
+0040104B   add         esp,44h
+0040104E   cmp         ebp,esp
+00401050   call        __chkesp (004010b0)
+00401055   mov         esp,ebp
+00401057   pop         ebp
+00401058   ret
+--------------------------------------------------------------------------
+From the assembly codes, we see apple a(); does nothing. The reason is this
+line is just a declaration of a function whose return type is apple.
+
+the b is the real local variable of apple type. 
+lea ecx, [ebp-4] loads the first local variable address to the ecx, which 
+is used to be the this pointer. And then it calls the constructor
+
+
+Question 3, (apple*) (0) -> print()
+--------------------------------------------------------------------------
+class apple
+{
+    int value;
+public:
+    apple() {}
+    ~apple() {}
+    void print() { return;} 
+};
+
+10:   void process()
+11:   {
+00401030   push        ebp
+00401031   mov         ebp,esp
+00401033   sub         esp,40h
+00401036   push        ebx
+00401037   push        esi
+00401038   push        edi
+00401039   lea         edi,[ebp-40h]
+0040103C   mov         ecx,10h
+00401041   mov         eax,0CCCCCCCCh
+00401046   rep stos    dword ptr [edi]
+12:       ((apple*)(0))->print();
+00401048   xor         ecx,ecx
+0040104A   call        @ILT+0(apple::print) (00401005)
+13:   }
+0040104F   pop         edi
+00401050   pop         esi
+00401051   pop         ebx
+00401052   add         esp,40h
+00401055   cmp         ebp,esp
+00401057   call        __chkesp (004010e0)
+0040105C   mov         esp,ebp
+0040105E   pop         ebp
+0040105F   ret
+--------------------------------------------------------------------------
+xor ecx, ecx set the this pointer to Null and then it calls apple::print()
+It does not crash due to we do nothing in the print function.
+
+
+
+Question 4, what is n, after int m = 1; int n = m++ + ++m;
+--------------------------------------------------------------------------
+10:   void process()
+11:   {
+0040D4D0   push        ebp
+0040D4D1   mov         ebp,esp
+0040D4D3   sub         esp,48h
+0040D4D6   push        ebx
+0040D4D7   push        esi
+0040D4D8   push        edi
+0040D4D9   lea         edi,[ebp-48h]
+0040D4DC   mov         ecx,12h
+0040D4E1   mov         eax,0CCCCCCCCh
+0040D4E6   rep stos    dword ptr [edi]
+12:       int m = 1;
+0040D4E8   mov         dword ptr [ebp-4],1
+13:       int n = m++ + ++m;
+0040D4EF   mov         eax,dword ptr [ebp-4]
+0040D4F2   add         eax,1
+0040D4F5   mov         dword ptr [ebp-4],eax
+0040D4F8   mov         ecx,dword ptr [ebp-4]
+0040D4FB   add         ecx,dword ptr [ebp-4]
+0040D4FE   mov         dword ptr [ebp-8],ecx
+0040D501   mov         edx,dword ptr [ebp-4]
+0040D504   add         edx,1
+0040D507   mov         dword ptr [ebp-4],edx
+14:   }
+0040D50A   pop         edi
+0040D50B   pop         esi
+0040D50C   pop         ebx
+0040D50D   mov         esp,ebp
+0040D50F   pop         ebp
+--------------------------------------------------------------------------
+After the first three lines at 0040D4EF, m is 2. It is actually ++m
+After the three lines at 0040D4F8, n is 4. It is actually n=m+m;
+After the last three lines at 0040D501, m is 3. It is actually m++;
+
+From the above, we can know C++ evaluate and calculate the express from 
+right to left.
+
+
+Question 5, difference between *p++ and (*p)++
+--------------------------------------------------------------------------
+10:   void process()
+11:   {
+0040D4D0   push        ebp
+0040D4D1   mov         ebp,esp
+0040D4D3   sub         esp,48h
+0040D4D6   push        ebx
+0040D4D7   push        esi
+0040D4D8   push        edi
+0040D4D9   lea         edi,[ebp-48h]
+0040D4DC   mov         ecx,12h
+0040D4E1   mov         eax,0CCCCCCCCh
+0040D4E6   rep stos    dword ptr [edi]
+12:       char data = 'a';
+0040D4E8   mov         byte ptr [ebp-4],61h
+13:       char* p = & data;
+0040D4EC   lea         eax,[ebp-4]
+0040D4EF   mov         dword ptr [ebp-8],eax
+14:       *p++;
+0040D4F2   mov         ecx,dword ptr [ebp-8]
+0040D4F5   add         ecx,1
+0040D4F8   mov         dword ptr [ebp-8],ecx
+15:       (*p)++;
+0040D4FB   mov         edx,dword ptr [ebp-8]
+0040D4FE   mov         al,byte ptr [edx]
+0040D500   add         al,1
+0040D502   mov         ecx,dword ptr [ebp-8]
+0040D505   mov         byte ptr [ecx],al
+16:   }
+0040D507   pop         edi
+0040D508   pop         esi
+0040D509   pop         ebx
+0040D50A   mov         esp,ebp
+0040D50C   pop         ebp
+0040D50D   ret
+--------------------------------------------------------------------------
+From the assembly codes, we can see *p++ just increase the pointer's address.
+It is same as p++ and then get the value.
+(*p)++ first get the value and then increase the value.
+From the above, we know the operator ++ has higher priority over operatior *
