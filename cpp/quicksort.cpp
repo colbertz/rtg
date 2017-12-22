@@ -32,6 +32,10 @@ void quicksort(int* data, int start, int end)
 {
 	if (start >= end) return;
 
+	// we can randomly pick up a pivot instead of
+	// always using the first item to avoid sorting
+	// a sorted array, which gives the badest 
+	// performance expectaion.
 	int pivot = data[start];
 
 	int i = start;
@@ -70,12 +74,8 @@ int main()
 	n = 100;
 	while (n--)
 	{
-		std::cout << array[n] << std::endl;
-	}
-
-	n = 100;
-	while (n--)
-	{
 		if (n > 0) assert(array[n] >= array[n - 1]);
+
+		std::cout << array[n] << std::endl;
 	}
 }
