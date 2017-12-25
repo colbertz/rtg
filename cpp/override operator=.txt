@@ -1,0 +1,60 @@
+There are two things must be considered, when designing a type's operator=
+function.
+1. Detection of the self assignment.
+2. Handling of the exception.
+Without the consideration of item1. We may first delete the right hand
+oprand and then uses it.
+Without the consideration of item2. We may delete the orginal instance, but
+cannot have the new one due to there is no memory for the new one.
+
+A good pattern is,
+1. Create the new object in memory.
+2. Swap this and the new object.
+3. Return this.
+
+Codes like:
+SampleClass& operator= (const SampleClass& s)
+{
+	SampleClass tmp(s);
+	swap(*this, tmp);
+	return *this;
+}
+
+All values and pointers are exchanged by swap directly. So the original
+memory will be released if tmp is out of the function block. (Destructor
+of the SampleClass is called).
+
+However, the template function swap in the std namespace is not suitable
+for the above task. It is as:
+template<class T>
+void swap(T& a, T& b)
+{
+    T c = a;
+    a = b;
+    b = c;
+}
+The reason is simple. This generic version of swap calls the overrided 
+operator= function, and calls into itself again. There will be a infinite
+loop.
+
+So we need to specialize the swap function. It should not involve the 
+assignment operator function.
+
+namespace std
+{
+	template<>
+	void swap<SampleClass>(SampleClass &s1, SampleClass &s2)
+	{
+		s1.swap(s2);
+	}
+}
+member function of SampleClass
+void swap(SampleClass& s)
+{
+	//swap all values
+	std::swap(v1, s.v1);
+	...
+	//swap all pointers
+    std::swap(p1, s.p1);
+	...
+}
