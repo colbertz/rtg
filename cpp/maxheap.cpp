@@ -89,9 +89,17 @@ class MaxHeap
 
         void Delete(int i)
         {
-            Swap(0, size-1);
+            Swap(i, size-1);
             size--;
-            BubbleDown(0);
+            
+            if(data[i]>data[(i-1)/2])
+            {
+                BubbleUp(i);
+            }
+            else
+            {
+                BubbleDown(i);
+            }
         }
 
         void Update(int i, int value)
@@ -195,20 +203,18 @@ int main()
         heap.Insert(MIN + rand() % (MAX + MIN - 1));
 	}
     
+    heap.Delete(50);
+    heap.Delete(50);
+    heap.Update(2, 142857);
+    heap.Update(13, -142857);
+    heap.Insert(999);
+    heap.Insert(0);
+
     n = 100;
     while (n--)
 	{
         array[n] = heap.PopupMax();
 	}
-
-    try
-    {
-	    heap.PopupMax();
-    }
-    catch( const MaxHeapEmptyException& ex)
-    {
-        std::cout << ex.message << std::endl;
-    }
 
 	n = 100;
 	while (n--)
