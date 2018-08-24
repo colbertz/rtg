@@ -20,5 +20,5 @@ float FastInvSqrt(float x)
 int main()
 {
     float ret = FastInvSqrt(2.82f);
-    std::cout<<ret;
+    std::cout<<ret<<std::endl;
 }
