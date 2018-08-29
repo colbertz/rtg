@@ -1,7 +1,7 @@
 //Origined from https://docs.opencv.org/master/d7/d37/tutorial_mat_mask_operations.html
 
 #include <iostream>
-#include <opencv2\opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace cv;
